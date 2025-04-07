@@ -1,0 +1,44 @@
+name: Snyk Security Scan
+
+on:
+  schedule:
+    - cron: '30 8 * * 5'  # Every Friday at 8:30 AM UTC (2 PM IST)
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/setup@v1
+        with:
+          version: 'v1.1080.0'
+
+      - name: Perform Snyk Test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk test --all-projects
+
+      - name: Monitor project on Snyk
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          snyk monitor --all-projects
+
+      - name: Send notification to Teams
+        run: |
+          curl -H 'Content-Type: application/json' \
+          -d '{
+                "text": "The Snyk security scan has completed. Check the summary and details in the workflow logs."
+              }' \
+          ${{ secrets.TEAMS_WEBHOOK_URL }}
