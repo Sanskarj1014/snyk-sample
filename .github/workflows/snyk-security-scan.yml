@@ -19,9 +19,9 @@ jobs:
           node-version: '18'
 
       - name: Run Snyk to check for vulnerabilities
-        uses: snyk/actions/node@master
-        with:
-          version: ...
+        uses: snyk/actions/node@0.4.0
+        # with:
+        #   version: ...
 
       - name: Perform Snyk Test
         env:
